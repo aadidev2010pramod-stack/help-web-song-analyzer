@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help Web — Song Analyzer</title>
+<style>
+  :root{
+    --bg:#0A0A0A;
+    --ink:#F4F3EF;
+    --ink-soft:#8A8A88;
+    --line:#242422;
+    --accent:#D97A45;
+    --panel:#121211;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+
+  .eyebrow{
+    display:block;
+    text-transform:uppercase;
+    letter-spacing:0.18em;
+    font-size:0.7rem;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+
+  /* ===== Nav ===== */
+  nav.topnav{
+    position:sticky;
+    top:0;
+    z-index:100;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:22px 5vw;
+    background:rgba(10,10,10,0.86);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .topnav .wordmark{
+    font-size:1rem;
+    font-weight:800;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+  }
+  .topnav .navlinks{
+    display:flex;
+    gap:28px;
+  }
+  .topnav .navlinks a{
+    text-transform:uppercase;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    color:var(--ink-soft);
+    font-weight:600;
+    transition:color 0.15s ease;
+  }
+  .topnav .navlinks a:hover{color:var(--ink);}
+  @media (max-width:700px){
+    .topnav .navlinks{display:none;}
+  }
+
+  /* ===== Hero ===== */
+  .hero{
+    position:relative;
+    min-height:92vh;
+    display:flex;
+    align-items:flex-end;
+    overflow:hidden;
+    background:#07080A;
+    padding:0 5vw 64px;
+  }
+  .hero-bg{
+    position:absolute;
+    inset:0;
+    z-index:0;
+  }
+  .hero-bg svg{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  .hero-fade{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    background:linear-gradient(180deg, rgba(7,8,10,0.05) 0%, rgba(7,8,10,0.35) 55%, rgba(7,8,10,0.97) 100%);
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:0.18;}
+    50%{opacity:0.95;}
+  }
+  @keyframes beacon{
+    0%,100%{opacity:0.25;}
+    50%{opacity:1;}
+  }
+  @keyframes drift{
+    from{transform:translateX(-4%);}
+    to{transform:translateX(4%);}
+  }
+  .win{animation:twinkle 3.4s ease-in-out infinite;}
+  .cn-light{animation:beacon 1.6s ease-in-out infinite;}
+  .cloud{animation:drift 40s ease-in-out infinite alternate;}
+  .hero-inner{
+    position:relative;
+    z-index:2;
+    max-width:820px;
+  }
+  .hero h1{
+    font-size:clamp(2.6rem,6.4vw,5.2rem);
+    line-height:0.98;
+    font-weight:800;
+    letter-spacing:-0.01em;
+    text-transform:uppercase;
+    margin:16px 0 22px;
+  }
+  .hero p{
+    max-width:52ch;
+    font-size:1.05rem;
+    color:#D8D6CF;
+    margin:0 0 30px;
+  }
+  .cta-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  .cta{
+    display:inline-block;
+    padding:14px 30px;
+    background:var(--ink);
+    color:#0A0A0A;
+    text-transform:uppercase;
+    font-size:0.78rem;
+    font-weight:700;
+    letter-spacing:0.12em;
+    transition:background 0.15s ease;
+  }
+  .cta:hover{background:var(--accent);}
+  .cta-ghost{
+    text-transform:uppercase;
+    font-size:0.75rem;
+    letter-spacing:0.14em;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--ink-soft);
+    padding-bottom:2px;
+  }
+  .cta-ghost:hover{color:var(--ink);border-color:var(--ink);}
+
+  /* ===== Section shell ===== */
+  .section{
+    padding:100px 5vw;
+    border-bottom:1px solid var(--line);
+  }
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:24px;
+    margin-bottom:52px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-size:clamp(1.6rem,3vw,2.4rem);
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:-0.01em;
+    margin:10px 0 0;
+    max-width:16ch;
+  }
+  .section-head p{
+    max-width:38ch;
+    color:var(--ink-soft);
+    font-size:0.95rem;
+    margin:0;
+  }
+
+  /* ===== Chatbot demo panel ===== */
+  .chatcard{
+    background:var(--panel);
+    border:1px solid var(--line);
+    max-width:520px;
+    margin-left:auto;
+  }
+  .chat-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+  }
+  .chat-topbar .dot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--accent);
+    display:inline-block;margin-right:9px;
+  }
+  .chat-topbar strong{
+    font-size:0.8rem;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+  .chat-log{
+    height:320px;
+    overflow-y:auto;
+    padding:20px;
+    font-size:0.92rem;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .msg{
+    max-width:84%;
+    padding:10px 14px;
+    line-height:1.45;
+  }
+  .msg.bot{
+    background:#1B1B19;
+    align-self:flex-start;
+    border-left:2px solid var(--accent);
+    color:#EDEBE3;
+  }
+  .msg.user{
+    background:var(--ink);
+    color:#0A0A0A;
+    align-self:flex-end;
+    font-weight:500;
+  }
+  .msg.bot .tag{
+    display:block;
+    font-size:0.62rem;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+  }
+  .chat-input-row{
+    display:flex;
+    border-top:1px solid var(--line);
+  }
+  .chat-input-row input{
+    flex:1;
+    border:none;
+    padding:16px 20px;
+    font-family:inherit;
+    font-size:0.92rem;
+    background:var(--panel);
+    color:var(--ink);
+  }
+  .chat-input-row input:focus{outline:none;background:#17171533;}
+  .chat-input-row input::placeholder{color:var(--ink-soft);}
+  .chat-input-row button{
+    border:none;
+    background:var(--accent);
+    color:#0A0A0A;
+    padding:0 26px;
+    text-transform:uppercase;
+    font-size:0.72rem;
+    letter-spacing:0.1em;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .chat-input-row button:hover{background:#EA9A6C;}
+  .quick-replies{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:0 20px 18px;
+  }
+  .quick-replies button{
+    font-size:0.68rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    border:1px solid var(--line);
+    background:transparent;
+    padding:8px 12px;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .quick-replies button:hover{background:var(--ink);color:#0A0A0A;border-color:var(--ink);}
+
+  /* ===== Stat strip ===== */
+  .stat-strip{
+    display:flex;
+    gap:64px;
+    flex-wrap:wrap;
+    margin-top:36px;
+  }
+  .stat-num{
+    font-size:2.4rem;
+    font-weight:800;
+    letter-spacing:-0.01em;
+  }
+  .stat-label{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+
+  /* ===== Tile grid (causes) ===== */
+  .tile-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+  }
+  @media (max-width:800px){.tile-grid{grid-template-columns:1fr;}}
+  .tile{
+    background:var(--bg);
+    padding:36px 30px;
+  }
+  .tile .tile-num{
+    font-size:0.72rem;
+    color:var(--accent);
+    letter-spacing:0.1em;
+    font-weight:700;
+  }
+  .tile h3{
+    font-size:1.15rem;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+    margin:16px 0 10px;
+  }
+  .tile p{
+    font-size:0.9rem;
+    color:var(--ink-soft);
+    margin:0;
+  }
+
+  /* ===== Flow row ===== */
+  .flow{
+    display:flex;
+    flex-wrap:wrap;
+  }
+  .flow-step{
+    flex:1;
+    min-width:180px;
+    border-top:1px solid var(--line);
+    padding:26px 24px 0 0;
+  }
+  .flow-step .eyebrow{margin-bottom:10px;}
+  .flow-step h4{
+    font-size:1rem;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    margin:0 0 8px;
+  }
+  .flow-step p{margin:0;font-size:0.87rem;color:var(--ink-soft);}
+
+  /* ===== Stack rows ===== */
+  .stack-list{margin-top:8px;}
+  .stack-row{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:24px;
+    padding:22px 0;
+    border-top:1px solid var(--line);
+  }
+  .stack-row:last-child{border-bottom:1px solid var(--line);}
+  @media (max-width:700px){.stack-row{grid-template-columns:1fr;gap:8px;}}
+  .stack-row .stack-name{
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:0.85rem;
+    letter-spacing:0.04em;
+  }
+  .stack-row p{margin:0;color:var(--ink-soft);font-size:0.92rem;max-width:56ch;}
+
+  /* ===== Top artists chart ===== */
+  .chart-list{margin-top:8px;}
+  .chart-row{
+    display:grid;
+    grid-template-columns:56px 1fr auto;
+    align-items:center;
+    gap:20px;
+    padding:20px 0;
+    border-top:1px solid var(--line);
+  }
+  .chart-row:last-child{border-bottom:1px solid var(--line);}
+  .chart-rank{
+    font-size:1.4rem;
+    font-weight:800;
+    color:var(--ink-soft);
+  }
+  .chart-row.is-top .chart-rank{color:var(--accent);}
+  .chart-name{
+    font-size:1rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+  }
+  .chart-tag{
+    font-size:0.68rem;
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+
+  /* ===== Footer ===== */
+  footer{
+    padding:36px 5vw 30px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .footer-top{
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+  }
+  footer .eyebrow{color:var(--ink-soft);}
+  .footer-credit{
+    padding-top:18px;
+    border-top:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .footer-credit .credit-name{
+    font-weight:800;
+    color:var(--ink);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+  .footer-credit .credit-name span{color:var(--accent);}
+
+  /* ===== Spotify player (footer row) ===== */
+  .footer-music{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding-top:18px;
+    border-top:1px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .footer-music-label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:160px;
+  }
+  .footer-music-label .eyebrow{margin:0;}
+  .footer-music-player{
+    flex:1;
+    max-width:360px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  .footer-music-player iframe{display:block;border:none;}
+
+  /* ===== Shazam / Identify UI ===== */
+  .identify-layout{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:48px;
+    align-items:start;
+  }
+  @media (max-width:900px){
+    .identify-layout{grid-template-columns:1fr;gap:40px;}
+  }
+
+  .shazam-stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:420px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:48px 24px;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .shazam-status{
+    text-transform:uppercase;
+    letter-spacing:0.16em;
+    font-size:0.72rem;
+    color:var(--ink-soft);
+    margin-bottom:36px;
+    font-weight:600;
+    min-height:1.2em;
+  }
+  .shazam-status.active{color:var(--accent);}
+
+  .shazam-btn-wrap{
+    position:relative;
+    width:180px;
+    height:180px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .shazam-ring{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:1px solid rgba(217,122,69,0.35);
+    opacity:0;
+    pointer-events:none;
+  }
+  .shazam-btn-wrap.listening .shazam-ring{
+    animation:ring-expand 2.2s ease-out infinite;
+  }
+  .shazam-btn-wrap.listening .shazam-ring:nth-child(2){animation-delay:0.55s;}
+  .shazam-btn-wrap.listening .shazam-ring:nth-child(3){animation-delay:1.1s;}
+
+  @keyframes ring-expand{
+    0%{transform:scale(0.55);opacity:0.7;}
+    100%{transform:scale(1.55);opacity:0;}
+  }
+
+  .shazam-btn{
+    position:relative;
+    z-index:2;
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    border:none;
+    background:var(--ink);
+    color:#0A0A0A;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    transition:background 0.2s ease, transform 0.15s ease;
+    box-shadow:0 0 0 0 rgba(217,122,69,0);
+  }
+  .shazam-btn:hover{background:var(--accent);}
+  .shazam-btn:active{transform:scale(0.96);}
+  .shazam-btn.listening{
+    background:var(--accent);
+    animation:pulse-glow 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse-glow{
+    0%,100%{box-shadow:0 0 0 0 rgba(217,122,69,0.45);}
+    50%{box-shadow:0 0 0 18px rgba(217,122,69,0);}
+  }
+  .shazam-btn svg{width:28px;height:28px;fill:currentColor;}
+  .shazam-btn span{
+    font-size:0.62rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+
+  .shazam-hint{
+    margin-top:28px;
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    text-align:center;
+    max-width:28ch;
+  }
+
+  .identify-panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+  }
+  .identify-panel .chat-topbar{border-bottom:1px solid var(--line);}
+  .identify-body{padding:20px;}
+  .identify-body textarea{
+    width:100%;
+    min-height:120px;
+    background:#1B1B19;
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-family:inherit;
+    font-size:0.92rem;
+    padding:14px;
+    resize:vertical;
+  }
+  .identify-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:14px;
+  }
+  .identify-actions button{
+    font-size:0.68rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    border:1px solid var(--line);
+    background:transparent;
+    padding:10px 16px;
+    cursor:pointer;
+    color:var(--ink-soft);
+  }
+  .identify-actions button.primary{
+    background:var(--accent);
+    color:#0A0A0A;
+    border-color:var(--accent);
+    font-weight:700;
+  }
+  .identify-actions button:hover{background:var(--ink);color:#0A0A0A;border-color:var(--ink);}
+  .identify-actions button.primary:hover{background:#EA9A6C;border-color:#EA9A6C;}
+
+  .match-card{
+    margin-top:20px;
+    padding:18px;
+    background:#1B1B19;
+    border-left:2px solid var(--accent);
+    display:none;
+  }
+  .match-card.visible{display:block;}
+  .match-card .match-label{
+    font-size:0.62rem;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .match-card .match-title{
+    font-size:1.15rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+    margin:0 0 4px;
+  }
+  .match-card .match-artist{
+    font-size:0.85rem;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-bottom:12px;
+  }
+  .match-card .match-meta{
+    font-size:0.82rem;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+  }
+  .match-card .match-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .match-card .match-actions a,
+  .match-card .match-actions button{
+    font-size:0.68rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:8px 14px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .match-card .match-actions a:hover,
+  .match-card .match-actions button:hover{
+    background:var(--ink);
+    color:#0A0A0A;
+  }
+
+  .mode-tabs{
+    display:flex;
+    gap:0;
+    border-bottom:1px solid var(--line);
+    margin-bottom:0;
+  }
+  .mode-tabs button{
+    flex:1;
+    padding:14px;
+    background:transparent;
+    border:none;
+    border-bottom:2px solid transparent;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    font-size:0.7rem;
+    letter-spacing:0.12em;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .mode-tabs button.active{
+    color:var(--ink);
+    border-bottom-color:var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wordmark">Help Web</div>
+  <div class="navlinks">
+    <a href="#identify">Identify</a>
+    <a href="#demo">Analyzer</a>
+    <a href="#how">How It Works</a>
+    <a href="#artists">Top Artists</a>
+    <a href="#build">Build</a>
+  </div>
+</nav>
+
+<section class="hero" id="problem">
+  <div class="hero-bg">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#050608"/>
+          <stop offset="55%" stop-color="#0B1016"/>
+          <stop offset="100%" stop-color="#12181F"/>
+        </linearGradient>
+        <linearGradient id="tower" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2A2E33"/>
+          <stop offset="100%" stop-color="#15171A"/>
+        </linearGradient>
+      </defs>
+
+      <rect x="0" y="0" width="1600" height="900" fill="url(#sky)"/>
+
+      <!-- stars -->
+      <g fill="#C9CDD3">
+        <circle class="win" cx="120" cy="90" r="1.4" style="animation-delay:.2s"/>
+        <circle class="win" cx="260" cy="60" r="1.1" style="animation-delay:1.1s"/>
+        <circle class="win" cx="430" cy="110" r="1.3" style="animation-delay:.6s"/>
+        <circle class="win" cx="980" cy="70" r="1.2" style="animation-delay:1.6s"/>
+        <circle class="win" cx="1200" cy="95" r="1.4" style="animation-delay:.9s"/>
+        <circle class="win" cx="1420" cy="55" r="1.1" style="animation-delay:.3s"/>
+        <circle class="win" cx="1520" cy="130" r="1.3" style="animation-delay:1.3s"/>
+      </g>
+
+      <!-- drifting clouds -->
+      <g class="cloud" opacity="0.14" fill="#3A4048" style="animation-delay:-6s">
+        <ellipse cx="300" cy="140" rx="180" ry="26"/>
+        <ellipse cx="440" cy="120" rx="140" ry="20"/>
+      </g>
+      <g class="cloud" opacity="0.10" fill="#3A4048" style="animation-delay:-22s">
+        <ellipse cx="1180" cy="180" rx="220" ry="30"/>
+        <ellipse cx="1340" cy="160" rx="150" ry="22"/>
+      </g>
+
+      <!-- distant skyline -->
+      <g fill="#181C21">
+        <rect x="0" y="620" width="60" height="280"/>
+        <rect x="70" y="560" width="46" height="340"/>
+        <rect x="125" y="600" width="54" height="300"/>
+        <rect x="188" y="520" width="40" height="380"/>
+        <rect x="236" y="640" width="70" height="260"/>
+        <rect x="1300" y="600" width="50" height="300"/>
+        <rect x="1358" y="540" width="42" height="360"/>
+        <rect x="1410" y="610" width="60" height="290"/>
+        <rect x="1478" y="560" width="46" height="340"/>
+        <rect x="1532" y="630" width="68" height="270"/>
+      </g>
+
+      <!-- mid skyline with windows -->
+      <g>
+        <rect x="330" y="470" width="90" height="430" fill="#20242A"/>
+        <rect x="440" y="520" width="60" height="380" fill="#1B1F25"/>
+        <rect x="520" y="440" width="80" height="460" fill="#242830"/>
+        <rect x="980" y="460" width="76" height="440" fill="#20242A"/>
+        <rect x="1070" y="510" width="58" height="390" fill="#1B1F25"/>
+        <rect x="1140" y="430" width="86" height="470" fill="#242830"/>
+        <rect x="1240" y="500" width="52" height="400" fill="#1B1F25"/>
+
+        <!-- windows -->
+        <g fill="#E7B36A">
+          <rect class="win" x="345" y="500" width="6" height="9" style="animation-delay:.4s"/>
+          <rect class="win" x="365" y="540" width="6" height="9" style="animation-delay:1.4s"/>
+          <rect class="win" x="385" y="580" width="6" height="9" style="animation-delay:.8s"/>
+          <rect class="win" x="400" y="620" width="6" height="9" style="animation-delay:2s"/>
+          <rect class="win" x="455" y="560" width="6" height="9" style="animation-delay:.2s"/>
+          <rect class="win" x="475" y="610" width="6" height="9" style="animation-delay:1.7s"/>
+          <rect class="win" x="540" y="480" width="6" height="9" style="animation-delay:.6s"/>
+          <rect class="win" x="560" y="520" width="6" height="9" style="animation-delay:1.1s"/>
+          <rect class="win" x="580" y="600" width="6" height="9" style="animation-delay:1.9s"/>
+          <rect class="win" x="1000" y="500" width="6" height="9" style="animation-delay:.3s"/>
+          <rect class="win" x="1020" y="550" width="6" height="9" style="animation-delay:1.5s"/>
+          <rect class="win" x="1085" y="540" width="6" height="9" style="animation-delay:.9s"/>
+          <rect class="win" x="1160" y="470" width="6" height="9" style="animation-delay:.5s"/>
+          <rect class="win" x="1180" y="530" width="6" height="9" style="animation-delay:1.3s"/>
+          <rect class="win" x="1200" y="590" width="6" height="9" style="animation-delay:2.1s"/>
+          <rect class="win" x="1255" y="540" width="6" height="9" style="animation-delay:.7s"/>
+        </g>
+      </g>
+
+      <!-- CN-Tower-like silhouette, centered -->
+      <g>
+        <rect x="793" y="150" width="14" height="620" fill="url(#tower)"/>
+        <rect x="770" y="330" width="60" height="46" rx="6" fill="url(#tower)"/>
+        <rect x="797" y="60" width="6" height="95" fill="#2A2E33"/>
+        <circle class="cn-light" cx="800" cy="58" r="6" fill="#D9634A"/>
+        <rect x="780" y="360" width="40" height="6" fill="#3A3020" opacity="0.5"/>
+      </g>
+
+      <!-- foreground rooftops -->
+      <g fill="#101317">
+        <rect x="0" y="800" width="1600" height="100"/>
+      </g>
+    </svg>
+  </div>
+  <div class="hero-fade"></div>
+  <div class="hero-inner">
+    <span class="eyebrow">Python / AI Lyrics Analyzer + Song ID</span>
+    <h1>Understand any song in seconds</h1>
+    <p>Paste lyrics or tap to listen — this tool breaks songs down instantly and can match them against a library of tracks. Built to show how far simple Python text analysis (and a Shazam-style front end) can go.</p>
+    <div class="cta-row">
+      <a class="cta" href="#identify">Identify A Song</a>
+      <a class="cta-ghost" href="#demo">Analyze Lyrics</a>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SHAZAM / IDENTIFY SECTION ========== -->
+<section class="section" id="identify">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Song ID</span>
+      <h2>Find music by sound or lyrics</h2>
+    </div>
+    <p>Tap the button to listen (mic + speech recognition when available), or paste lyrics to match against a curated OVO / R&B library.</p>
+  </div>
+
+  <div class="identify-layout">
+    <!-- Left: Shazam-style listen stage -->
+    <div class="shazam-stage">
+      <div class="shazam-status" id="shazamStatus">Tap to listen</div>
+      <div class="shazam-btn-wrap" id="shazamWrap">
+        <div class="shazam-ring"></div>
+        <div class="shazam-ring"></div>
+        <div class="shazam-ring"></div>
+        <button class="shazam-btn" id="shazamBtn" type="button" aria-label="Identify song by sound">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>
+          <span id="shazamBtnLabel">Listen</span>
+        </button>
+      </div>
+      <p class="shazam-hint" id="shazamHint">Allow microphone access, then speak or play lyrics near the mic. Best results when you say the words clearly.</p>
+    </div>
+
+    <!-- Right: Lyrics search + results -->
+    <div class="identify-panel">
+      <div class="mode-tabs">
+        <button type="button" class="active" data-mode="lyrics" id="tabLyrics">By Lyrics</button>
+        <button type="button" data-mode="sound" id="tabSound">By Sound</button>
+      </div>
+      <div class="chat-topbar">
+        <span><span class="dot"></span><strong>Song Matcher</strong></span>
+        <span class="eyebrow" style="margin:0;" id="matcherReady">Ready</span>
+      </div>
+      <div class="identify-body">
+        <textarea id="identifyInput" placeholder="Paste a few lines of lyrics, or use the Listen button and speak them…"></textarea>
+        <div class="identify-actions">
+          <button type="button" class="primary" onclick="findSongByLyrics()">Find Song</button>
+          <button type="button" onclick="loadIdentifySample()">Load sample</button>
+          <button type="button" onclick="clearIdentify()">Clear</button>
+        </div>
+        <div class="match-card" id="matchCard">
+          <div class="match-label">Best match</div>
+          <div class="match-title" id="matchTitle">—</div>
+          <div class="match-artist" id="matchArtist">—</div>
+          <p class="match-meta" id="matchMeta"></p>
+          <div class="match-actions">
+            <button type="button" onclick="analyzeMatched()">Analyze these lyrics</button>
+            <a id="matchSpotify" href="#" target="_blank" rel="noopener" style="display:none;">Open Spotify</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="demo">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Live Demo</span>
+      <h2>Paste in a song</h2>
+    </div>
+    <p>Drop in a verse, chorus, or full set of lyrics and see what the analyzer finds.</p>
+  </div>
+
+  <div class="chatcard">
+    <div class="chat-topbar">
+      <span><span class="dot"></span><strong>Song Analyzer</strong></span>
+      <span class="eyebrow" style="margin:0;">Ready</span>
+    </div>
+    <div style="padding:20px;">
+      <textarea id="lyricsInput" placeholder="Paste lyrics here…" style="width:100%;min-height:150px;background:#1B1B19;border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:0.92rem;padding:14px;resize:vertical;"></textarea>
+    </div>
+    <div class="quick-replies">
+      <button onclick="loadSample()">Load a sample</button>
+      <button onclick="clearAnalyzer()">Clear</button>
+    </div>
+    <div class="chat-input-row" style="border-top:1px solid var(--line);">
+      <button onclick="analyzeLyrics()" style="flex:1;padding:16px 0;">Analyze</button>
+    </div>
+    <div id="analyzerResults" class="chat-log" style="display:none;height:auto;max-height:340px;"></div>
+  </div>
+
+  <div class="stat-strip">
+    <div><div class="stat-num" id="statWords">—</div><div class="stat-label">Total words</div></div>
+    <div><div class="stat-num" id="statUnique">—</div><div class="stat-label">Unique words</div></div>
+    <div><div class="stat-num" id="statMood">—</div><div class="stat-label">Overall mood</div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">What It Measures</span>
+      <h2>Three angles on every song</h2>
+    </div>
+  </div>
+  <div class="tile-grid">
+    <div class="tile">
+      <span class="tile-num">01</span>
+      <h3>Word & line stats</h3>
+      <p>Total words, unique words, average words per line, and roughly how long the song takes to read out loud.</p>
+    </div>
+    <div class="tile">
+      <span class="tile-num">02</span>
+      <h3>Mood & tone</h3>
+      <p>Lyrics are scored against word lists for love, heartbreak, joy, and anger to estimate the song's overall emotional lean.</p>
+    </div>
+    <div class="tile">
+      <span class="tile-num">03</span>
+      <h3>Repetition & hooks</h3>
+      <p>The most repeated word or phrase is usually the hook — the analyzer surfaces it along with how often it repeats.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">How The Analyzer Works</span>
+      <h2>Lyrics in, insight out</h2>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="flow-step">
+      <span class="eyebrow">Step 1</span>
+      <h4>Paste or listen</h4>
+      <p>Any verse, chorus, or full song — or speak lyrics into the mic for identification.</p>
+    </div>
+    <div class="flow-step">
+      <span class="eyebrow">Step 2</span>
+      <h4>Text gets parsed</h4>
+      <p>Python-style logic strips punctuation, splits into words and lines, and counts frequency.</p>
+    </div>
+    <div class="flow-step">
+      <span class="eyebrow">Step 3</span>
+      <h4>Mood is scored</h4>
+      <p>Each word is checked against emotion word lists to tally an overall tone.</p>
+    </div>
+    <div class="flow-step">
+      <span class="eyebrow">Step 4</span>
+      <h4>Match & results</h4>
+      <p>Word stats, mood, likely hook, and best library match appear instantly.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="build">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">What's Under The Hood</span>
+      <h2>Built with Python + browser APIs</h2>
+    </div>
+    <p>The analysis logic is rule-based text processing; the Shazam-style UI uses the Web Speech API (when available) and a small in-browser song library for matching.</p>
+  </div>
+  <div class="stack-list">
+    <div class="stack-row"><div class="stack-name">Text parsing</div><p>Lyrics are split into lines and words, punctuation stripped, so every metric is counted cleanly.</p></div>
+    <div class="stack-row"><div class="stack-name">Mood scoring</div><p>Word lists for love, heartbreak, joy, and anger are tallied against the lyrics to estimate overall tone.</p></div>
+    <div class="stack-row"><div class="stack-name">Repetition detection</div><p>Word and line frequency is tracked to surface the most repeated hook in the song.</p></div>
+    <div class="stack-row"><div class="stack-name">Song matching</div><p>Input lyrics (or speech transcript) are scored against a curated library of OVO / R&B tracks by shared significant words.</p></div>
+    <div class="stack-row"><div class="stack-name">Listen UI</div><p>Microphone access + Web Speech Recognition powers the Shazam-style button; pure audio fingerprinting would need a backend service.</p></div>
+  </div>
+</section>
+
+<section class="section" id="artists">
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">On Repeat</span>
+      <h2>Top artists right now</h2>
+    </div>
+    <p>PartyNextDoor and the OVO Sound / R&B artists in heavy rotation alongside him.</p>
+  </div>
+  <div class="chart-list">
+    <div class="chart-row is-top">
+      <span class="chart-rank">01</span>
+      <span class="chart-name">PARTYNEXTDOOR</span>
+      <span class="chart-tag">OVO Sound</span>
+    </div>
+    <div class="chart-row">
+      <span class="chart-rank">02</span>
+      <span class="chart-name">Drake</span>
+      <span class="chart-tag">OVO Sound</span>
+    </div>
+    <div class="chart-row">
+      <span class="chart-rank">03</span>
+      <span class="chart-name">Bryson Tiller</span>
+      <span class="chart-tag">R&B</span>
+    </div>
+    <div class="chart-row">
+      <span class="chart-rank">04</span>
+      <span class="chart-name">dvsn</span>
+      <span class="chart-tag">OVO Sound</span>
+    </div>
+    <div class="chart-row">
+      <span class="chart-rank">05</span>
+      <span class="chart-name">Roy Woods</span>
+      <span class="chart-tag">OVO Sound</span>
+    </div>
+    <div class="chart-row">
+      <span class="chart-rank">06</span>
+      <span class="chart-name">Majid Jordan</span>
+      <span class="chart-tag">OVO Sound</span>
+    </div>
+    <div class="chart-row">
+      <span class="chart-rank">07</span>
+      <span class="chart-name">6LACK</span>
+      <span class="chart-tag">R&B</span>
+    </div>
+    <div class="chart-row">
+      <span class="chart-rank">08</span>
+      <span class="chart-name">Tory Lanez</span>
+      <span class="chart-tag">R&B</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-music">
+    <div class="footer-music-label">
+      <span class="eyebrow">♪ PartyNextDoor</span>
+    </div>
+    <div class="footer-music-player">
+      <iframe id="spotifyFrame"
+        data-src="https://open.spotify.com/embed/playlist/37i9dQZF1DZ06evO1yvnUc?utm_source=generator&theme=0"
+        width="100%" height="80" frameborder="0" allowfullscreen=""
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy">
+      </iframe>
+    </div>
+  </div>
+  <div class="footer-credit">
+    <span class="eyebrow">Credit</span>
+    <span class="credit-name">Made by <span>Adi</span></span>
+  </div>
+</footer>
+
+<script>
+/* ---------- Sample lyrics (analyzer) ---------- */
+const sampleLyrics = `Late nights, city lights, thinking 'bout you again
+Same old story, same old ending, same old friend
+I keep coming back, back to what we had
+Good memories mixed up with the bad
+Late nights, city lights, thinking 'bout you again`;
+
+/* ---------- Curated song library for matching ---------- */
+const knownSongs = [
+  {
+    title: "Come and See Me",
+    artist: "PARTYNEXTDOOR ft. Drake",
+    snippet: "come and see me when you free i got a feeling that you need some company come and see me",
+    spotify: "https://open.spotify.com/track/1e1JKLEDKP7hEQzJfNAgPl"
+  },
+  {
+    title: "Recognize",
+    artist: "PARTYNEXTDOOR ft. Drake",
+    snippet: "i recognize that you been through a lot i recognize that you been through a lot recognize",
+    spotify: "https://open.spotify.com/track/5G2f63n7ID0qA5b7vG0m0m"
+  },
+  {
+    title: "Break from Toronto",
+    artist: "PARTYNEXTDOOR",
+    snippet: "break from toronto i need a break from toronto leave me alone i need a break",
+    spotify: "https://open.spotify.com/track/0V3wPSX9ygBnCm8LGfK0lq"
+  },
+  {
+    title: "Loyal",
+    artist: "PARTYNEXTDOOR",
+    snippet: "i been loyal loyal loyal loyal i been loyal to you loyal",
+    spotify: "https://open.spotify.com/search/PARTYNEXTDOOR%20Loyal"
+  },
+  {
+    title: "With You",
+    artist: "Drake ft. PARTYNEXTDOOR",
+    snippet: "i want to be with you right now i want to be with you right now with you",
+    spotify: "https://open.spotify.com/track/3aZwCizU3VhH6Q5f3m0q0q"
+  },
+  {
+    title: "Don't Interrupt",
+    artist: "PARTYNEXTDOOR",
+    snippet: "don't interrupt me when i'm talking to you don't interrupt don't interrupt",
+    spotify: "https://open.spotify.com/search/PARTYNEXTDOOR%20Don't%20Interrupt"
+  },
+  {
+    title: "Not Nice",
+    artist: "PARTYNEXTDOOR",
+    snippet: "you not nice you not nice you not nice you not nice",
+    spotify: "https://open.spotify.com/search/PARTYNEXTDOOR%20Not%20Nice"
+  },
+  {
+    title: "Peace of Mind",
+    artist: "PARTYNEXTDOOR",
+    snippet: "peace of mind peace of mind i need some peace of mind",
+    spotify: "https://open.spotify.com/search/PARTYNEXTDOOR%20Peace%20of%20Mind"
+  },
+  {
+    title: "Don't",
+    artist: "Bryson Tiller",
+    snippet: "don't don't don't don't don't don't don't don't",
+    spotify: "https://open.spotify.com/track/3pXF1nA74528Edde4of9CC"
+  },
+  {
+    title: "Exchange",
+    artist: "Bryson Tiller",
+    snippet: "this what happen when i open up this what happen when i open up exchange",
+    spotify: "https://open.spotify.com/track/43PuMrRfbyyuzKLJpNqB0v"
+  },
+  {
+    title: "Hotline Bling",
+    artist: "Drake",
+    snippet: "you used to call me on my cell phone late night when you need my love hotline bling",
+    spotify: "https://open.spotify.com/track/0wwPcA6wtMf6HUMpIRdeP7"
+  },
+  {
+    title: "One Dance",
+    artist: "Drake",
+    snippet: "baby i like your style grips on your waist front way back way you know that i got the juice",
+    spotify: "https://open.spotify.com/track/1zi7xx7UVEFkmKfv06H8c0"
+  },
+  {
+    title: "Hold On, We're Going Home",
+    artist: "Drake",
+    snippet: "hold on we're going home i got so high i got so high i got so high i got so high",
+    spotify: "https://open.spotify.com/track/2aibwv5hGXKsYj0y0t0m0m"
+  },
+  {
+    title: "PRBLMS",
+    artist: "6LACK",
+    snippet: "i got a lot of problems i got a lot of problems prblms",
+    spotify: "https://open.spotify.com/track/4Q3N4Ct4zCuIHuZ65E3BD4"
+  },
+  {
+    title: "The Weekend",
+    artist: "SZA",
+    snippet: "you say you got a lot of friends but i can bet that they don't know you the weekend",
+    spotify: "https://open.spotify.com/track/6gU9OKjOE7ghfEdHswffRJ"
+  }
+];
+
+const moodWords = {
+  love: ['love','heart','baby','kiss','forever','together','close','hold'],
+  heartbreak: ['gone','cry','tears','alone','miss','goodbye','broken','hurt','sad'],
+  joy: ['happy','dance','shine','light','free','smile','celebrate','good'],
+  anger: ['hate','mad','fight','rage','fire','burn','wrong','never']
+};
+
+/* ---------- Analyzer helpers (existing) ---------- */
+function loadSample(){
+  document.getElementById('lyricsInput').value = sampleLyrics;
+}
+
+function clearAnalyzer(){
+  document.getElementById('lyricsInput').value = '';
+  document.getElementById('analyzerResults').style.display = 'none';
+  document.getElementById('analyzerResults').innerHTML = '';
+  document.getElementById('statWords').textContent = '—';
+  document.getElementById('statUnique').textContent = '—';
+  document.getElementById('statMood').textContent = '—';
+}
+
+function analyzeLyrics(){
+  const raw = document.getElementById('lyricsInput').value.trim();
+  const resultsBox = document.getElementById('analyzerResults');
+  if(!raw){
+    resultsBox.style.display = 'flex';
+    resultsBox.innerHTML = '<div class="msg bot"><span class="tag">Analyzer</span>Paste some lyrics first, or hit "Load a sample" to try it out.</div>';
+    return;
+  }
+
+  const lines = raw.split('\n').filter(l => l.trim().length > 0);
+  const words = raw.toLowerCase().replace(/[^a-z0-9' \n]/g, '').split(/\s+/).filter(Boolean);
+  const totalWords = words.length;
+  const uniqueWords = new Set(words).size;
+  const avgWordsPerLine = lines.length ? (totalWords / lines.length).toFixed(1) : 0;
+  const readingTime = Math.max(1, Math.round(totalWords / 2.5));
+
+  const freq = {};
+  words.forEach(w => { freq[w] = (freq[w] || 0) + 1; });
+  let topWord = '';
+  let topCount = 0;
+  Object.entries(freq).forEach(([w,c]) => {
+    if(c > topCount && w.length > 2){ topWord = w; topCount = c; }
+  });
+
+  const lineFreq = {};
+  lines.forEach(l => {
+    const key = l.trim().toLowerCase();
+    lineFreq[key] = (lineFreq[key] || 0) + 1;
+  });
+  let topLine = '';
+  let topLineCount = 0;
+  Object.entries(lineFreq).forEach(([l,c]) => {
+    if(c > topLineCount){ topLine = l; topLineCount = c; }
+  });
+
+  const scores = { love:0, heartbreak:0, joy:0, anger:0 };
+  words.forEach(w => {
+    Object.entries(moodWords).forEach(([mood, list]) => {
+      if(list.includes(w)) scores[mood]++;
+    });
+  });
+  let mood = 'Neutral';
+  let moodScore = 0;
+  Object.entries(scores).forEach(([m,s]) => {
+    if(s > moodScore){ mood = m.charAt(0).toUpperCase() + m.slice(1); moodScore = s; }
+  });
+
+  document.getElementById('statWords').textContent = totalWords;
+  document.getElementById('statUnique').textContent = uniqueWords;
+  document.getElementById('statMood').textContent = mood;
+
+  // Also try a quick library match
+  const match = matchSong(raw);
+  let matchHtml = '';
+  if(match && match.score >= 2){
+    matchHtml = `<div class="msg bot"><span class="tag">Possible Match</span><strong>${match.title}</strong> — ${match.artist} (score ${match.score})</div>`;
+  }
+
+  resultsBox.style.display = 'flex';
+  resultsBox.innerHTML = `
+    <div class="msg bot"><span class="tag">Word Stats</span>${totalWords} words across ${lines.length} lines · ${uniqueWords} unique words · avg ${avgWordsPerLine} words/line</div>
+    <div class="msg bot"><span class="tag">Reading Time</span>About ${readingTime} second${readingTime === 1 ? '' : 's'} to read at a natural pace</div>
+    <div class="msg bot"><span class="tag">Mood</span>Leans <strong>${mood}</strong>${moodScore > 0 ? ` (${moodScore} matching word${moodScore === 1 ? '' : 's'})` : ' — no strong signal either way'}</div>
+    <div class="msg bot"><span class="tag">Most Repeated Word</span>${topWord ? `"${topWord}" appears ${topCount} time${topCount === 1 ? '' : 's'}` : 'No repeated words found'}</div>
+    ${topLineCount > 1 ? `<div class="msg bot"><span class="tag">Likely Hook</span>"${topLine}" repeats ${topLineCount} times</div>` : ''}
+    ${matchHtml}
+  `;
+}
+
+/* ---------- Song matching ---------- */
+function tokenize(text){
+  return text.toLowerCase()
+    .replace(/[^a-z0-9' \n]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 2);
+}
+
+function matchSong(queryText){
+  const qWords = new Set(tokenize(queryText));
+  if(qWords.size === 0) return null;
+
+  let best = null;
+  knownSongs.forEach(song => {
+    const sWords = tokenize(song.snippet + ' ' + song.title + ' ' + song.artist);
+    let score = 0;
+    sWords.forEach(w => { if(qWords.has(w)) score++; });
+    // bonus for title/artist hits
+    tokenize(song.title).forEach(w => { if(qWords.has(w)) score += 2; });
+    if(!best || score > best.score){
+      best = { ...song, score };
+    }
+  });
+  return best;
+}
+
+function showMatch(match){
+  const card = document.getElementById('matchCard');
+  if(!match || match.score < 2){
+    card.classList.remove('visible');
+    document.getElementById('matcherReady').textContent = 'No strong match';
+    return;
+  }
+  document.getElementById('matchTitle').textContent = match.title;
+  document.getElementById('matchArtist').textContent = match.artist;
+  document.getElementById('matchMeta').textContent = `Match strength: ${match.score} shared terms · from the local library`;
+  const sp = document.getElementById('matchSpotify');
+  if(match.spotify){
+    sp.href = match.spotify;
+    sp.style.display = 'inline-block';
+  } else {
+    sp.style.display = 'none';
+  }
+  card.classList.add('visible');
+  document.getElementById('matcherReady').textContent = 'Match found';
+  // keep last matched lyrics for analyze
+  window._lastMatchedLyrics = match.snippet;
+}
+
+function findSongByLyrics(){
+  const raw = document.getElementById('identifyInput').value.trim();
+  if(!raw){
+    document.getElementById('matcherReady').textContent = 'Paste lyrics first';
+    document.getElementById('matchCard').classList.remove('visible');
+    return;
+  }
+  const match = matchSong(raw);
+  showMatch(match);
+}
+
+function loadIdentifySample(){
+  document.getElementById('identifyInput').value = `come and see me when you free
+i got a feeling that you need some company
+come and see me`;
+}
+
+function clearIdentify(){
+  document.getElementById('identifyInput').value = '';
+  document.getElementById('matchCard').classList.remove('visible');
+  document.getElementById('matcherReady').textContent = 'Ready';
+  window._lastMatchedLyrics = null;
+}
+
+function analyzeMatched(){
+  const text = window._lastMatchedLyrics || document.getElementById('identifyInput').value;
+  if(!text) return;
+  document.getElementById('lyricsInput').value = text;
+  document.getElementById('demo').scrollIntoView({behavior:'smooth'});
+  setTimeout(analyzeLyrics, 400);
+}
+
+/* ---------- Shazam-style listen (Web Speech API) ---------- */
+let recognition = null;
+let isListening = false;
+
+function setListeningUI(on){
+  isListening = on;
+  const wrap = document.getElementById('shazamWrap');
+  const btn = document.getElementById('shazamBtn');
+  const status = document.getElementById('shazamStatus');
+  const label = document.getElementById('shazamBtnLabel');
+  const hint = document.getElementById('shazamHint');
+
+  if(on){
+    wrap.classList.add('listening');
+    btn.classList.add('listening');
+    status.textContent = 'Listening…';
+    status.classList.add('active');
+    label.textContent = 'Stop';
+    hint.textContent = 'Speak or play the lyrics clearly. Tap again to stop.';
+  } else {
+    wrap.classList.remove('listening');
+    btn.classList.remove('listening');
+    status.textContent = 'Tap to listen';
+    status.classList.remove('active');
+    label.textContent = 'Listen';
+    hint.textContent = 'Allow microphone access, then speak or play lyrics near the mic. Best results when you say the words clearly.';
+  }
+}
+
+function initSpeechRecognition(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    return null;
+  }
+  const rec = new SpeechRecognition();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.lang = 'en-US';
+
+  rec.onresult = (event) => {
+    let transcript = '';
+    for(let i = event.resultIndex; i < event.results.length; i++){
+      transcript += event.results[i][0].transcript + ' ';
+    }
+    transcript = transcript.trim();
+    if(transcript){
+      document.getElementById('identifyInput').value = transcript;
+      document.getElementById('matcherReady').textContent = 'Heard speech…';
+      // live-ish match on final results
+      if(event.results[event.results.length - 1].isFinal){
+        const match = matchSong(transcript);
+        showMatch(match);
+      }
+    }
+  };
+
+  rec.onerror = (event) => {
+    console.warn('Speech error', event.error);
+    setListeningUI(false);
+    const status = document.getElementById('shazamStatus');
+    if(event.error === 'not-allowed'){
+      status.textContent = 'Mic blocked';
+      document.getElementById('shazamHint').textContent = 'Allow microphone access in the browser, then try again. Or paste lyrics instead.';
+    } else if(event.error === 'no-speech'){
+      status.textContent = 'No speech detected';
+    } else {
+      status.textContent = 'Couldn’t hear that';
+    }
+  };
+
+  rec.onend = () => {
+    if(isListening){
+      // restart if user hasn’t stopped (some browsers end after silence)
+      try { recognition.start(); } catch(e){ setListeningUI(false); }
+    } else {
+      setListeningUI(false);
+    }
+  };
+
+  return rec;
+}
+
+function toggleListen(){
+  if(isListening){
+    isListening = false;
+    if(recognition){
+      try { recognition.stop(); } catch(e){}
+    }
+    setListeningUI(false);
+    // final match attempt
+    const text = document.getElementById('identifyInput').value.trim();
+    if(text) findSongByLyrics();
+    return;
+  }
+
+  if(!recognition){
+    recognition = initSpeechRecognition();
+  }
+  if(!recognition){
+    document.getElementById('shazamStatus').textContent = 'Speech API unavailable';
+    document.getElementById('shazamHint').textContent = 'This browser doesn’t support speech recognition. Paste lyrics into the panel on the right instead.';
+    return;
+  }
+
+  try {
+    recognition.start();
+    setListeningUI(true);
+    document.getElementById('matcherReady').textContent = 'Listening…';
+  } catch(e){
+    document.getElementById('shazamStatus').textContent = 'Couldn’t start mic';
+    document.getElementById('shazamHint').textContent = 'Check permissions or paste lyrics instead.';
+  }
+}
+
+document.getElementById('shazamBtn').addEventListener('click', toggleListen);
+
+/* Mode tabs (visual only — both use same panel) */
+document.getElementById('tabLyrics').addEventListener('click', function(){
+  document.getElementById('tabLyrics').classList.add('active');
+  document.getElementById('tabSound').classList.remove('active');
+  document.getElementById('identifyInput').placeholder = 'Paste a few lines of lyrics…';
+});
+document.getElementById('tabSound').addEventListener('click', function(){
+  document.getElementById('tabSound').classList.add('active');
+  document.getElementById('tabLyrics').classList.remove('active');
+  document.getElementById('identifyInput').placeholder = 'Or speak lyrics after tapping Listen…';
+  document.getElementById('shazamBtn').focus();
+});
+
+window.addEventListener('load', () => {
+  const frame = document.getElementById('spotifyFrame');
+  if(frame && frame.dataset.src){
+    frame.src = frame.dataset.src;
+  }
+});
+</script>
+
+</body>
+</html>
